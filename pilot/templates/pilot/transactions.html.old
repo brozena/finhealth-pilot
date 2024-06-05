@@ -1,0 +1,41 @@
+<body>
+<table border="1">
+    <tr>
+        <th>pending_transaction_id</th>
+        <th>category_id</th>
+        <th>category</th>
+        <th>location</th>
+        <th>payment_meta</th>
+        <th>account_owner</th>
+        <th>name</th>
+        <th>account_id</th>
+        <th>amount</th>
+        <th>iso_currency_code</th>
+        <th>unofficial_currency_code</th>
+        <th>date</th>
+        <th>pending</th>
+        <th>transaction_id</th>
+        <th>payment_channel</th>
+        <th>authorized_date</th>
+        <th>authorized_datetime</th>
+        <th>datetime</th>
+        <th>transaction_code</th>
+        <th>check_number</th>
+        <th>merchant_name</th>
+        <th>personal_finance_category</th>
+        <th>transaction_type</th>
+    </tr>
+
+
+        {% for transaction in transactions %}
+            <tr>
+            {% for data in transaction.values %}
+                <td>{{ data }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+
+</table>
+
+</body>
+

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'pilot/style.css' %}">
+        <title>Personal Finance App</title>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Personal Finance</h1>
+        </div>    
+        <div class="chart">
+            <h3>CHARTS</h3>            
+            <div class="chart-data">
+                <canvas id="summary-chart" style="width:100%;max-width:700px;max-height:400px"></canvas>
+                <canvas id="doughnut-chart" style="width:100%;max-width:300px;max-height:400px"></canvas>
+            </div>
+        </div>
+        <div class="finances">
+            <div class="accounts-column">
+                <h3>ACCOUNTS</h3>
+                <div class="accounts">
+                    <div id="account-list"></div>
+                </div>
+            </div>
+            <div class="transactions-column">
+                <h3>TRANSACTIONS</h3>
+                <div class="account-transactions">
+                    <div id="transactions"></div>
+                </div>    
+            </div>
+
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+        <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+        <script type="text/javascript">
+            (async function() {
+                const accountBalance = async () => {
+                    const response = await fetch('/finance/balance/account_balance', {method: 'POST'});
+                    const responseJSON = await response.json();
+                    return responseJSON;
+                }
+                const accountTransactions = async() => {
+                    const response = await fetch('/finance/transactions/get_transactions', {method: 'POST'});
+                    const responseJSON = await response.json();
+                    return responseJSON;
+                    return response;
+                }
+                const balanceDetails = await accountBalance();
+                const transactionsDetails = await accountTransactions();
+                // console.log(transactionsDetails);
+
+                var category_spending = {};
+                transactionsDetails.transactions.forEach(transaction => {
+                    if (transaction.category[0] in category_spending) {
+                        category_spending[transaction.category[0]] += transaction.amount;
+                    } else {
+                        category_spending[transaction.category[0]] = transaction.amount;
+                    }
+                });             
+                for (const [key, value] of Object.entries(category_spending)) {
+                    category_spending[key] = value.toFixed(2);
+                }
+                delete category_spending['Transfer'];
+                var xValues = Object.keys(category_spending);
+                var yValues = Object.values(category_spending);
+                
+                var total = 0;
+                var category_spending_percent = {}
+                for (var i in category_spending) {
+                    total += parseFloat(category_spending[i]);
+                }
+                for (const [key, value] of Object.entries(category_spending)) {
+                    category_spending_percent[key] = ((parseFloat(value)/total)*100).toFixed(1);
+                }
+                var yValuesPercent = Object.values(category_spending_percent);
+                
+                console.log(yValuesPercent)
+                console.log(yValuesPercent[0])
+                console.log(yValuesPercent[1])
+                
+             
+                barColor = ['#FFEE93',
+                            '#FFC09F',
+                            '#60993E',
+                            '#A0CED9',
+                            '#846A6A'];  
+                borderColor = ['#FFEE93',
+                            '#FFC09F',
+                            '#60993E',
+                            '#A0CED9',
+                            '#846A6A'];       
+
+
+                Chart.register(ChartDataLabels);
+                new Chart("summary-chart", {
+                    type: "bar",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                            data: yValues,
+                            barPercentage: 1,
+                            categoryPercentage: 0.8,
+                            backgroundColor: barColor,
+                            borderColor: borderColor,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'end',
+                                color: '#000000',
+                                formatter: function(value) {
+                                    return '$' + value;
+                                },
+                            },
+                            tooltip: {
+                                enabled: false,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function(value, index, ticks) {
+                                        return '$' + value;
+                                    }
+                                }
+                            },
+                        }
+                    }
+                });
+
+
+                new Chart("doughnut-chart", {
+                    type: "doughnut",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                            data: yValuesPercent,
+                            backgroundColor: barColor,
+                            borderColor: borderColor,
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            datalabels: false,
+                            tooltip: {
+                                callbacks: {
+                                    label: (tooltipItem) => {
+                                        return tooltipItem.label + ': ' + tooltipItem.parsed + '%';  
+                                    }
+                                }
+                            }                            
+                        },
+                    },
+
+                });
+
+                var balance_data = '';
+                balanceDetails.accounts.forEach(account => displayBalance(account));
+
+                // Extracts balance details from account, converts to html 
+                function displayBalance(account) {
+                    balance_data += '<div class="account-item" id="' +
+                        account.account_id +
+                        '">' +
+                        account.name +
+                        ' (' +
+                        (account.balances.available ? account.balances.available : 0) +
+                        '/' +
+                        (account.balances.current ? account.balances.current : 0) +
+                        ' ' +
+                        account.balances.iso_currency_code +
+                        ')' +
+                        '</div>';
+                    
+                }
+                document.getElementById('account-list').innerHTML = balance_data;
+                                
+                document.getElementById('account-list').addEventListener('click', function(event) {
+                    var transactions_data = '';
+                    var target_account_id = event.toElement.id;
+                    
+                    var target_transactions = [];
+                    var all_transactions = transactionsDetails.transactions;
+
+                    all_transactions.forEach(transaction => {
+                        if (transaction.account_id == target_account_id) {
+                            target_transactions.push(transaction);
+                        }
+                    });
+
+                    target_transactions.forEach(transaction => displayTransactions(transaction));
+
+                    function displayTransactions(transaction) {
+                        transactions_data += '<div class="transactions-item' +
+                            (transaction.amount < 0 ? '">' : ' transactions-item-negative">') +
+                            transaction.date +
+                            ' ' +
+                            -transaction.amount +
+                            ' ' +
+                            transaction.iso_currency_code +
+                            ' - ' +
+                            transaction.name +
+                            '</div>'
+                    }
+                    document.getElementById('transactions').innerHTML = transactions_data;
+                });
+            })();
+
+        </script>
+    </body>
+</html>
