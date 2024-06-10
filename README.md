@@ -8,7 +8,7 @@ First, clone our repo using `git clone https://github.com/brozena/finhealth-pilo
 
 ### pipx & poetry
 
-We use [pipx](https://pipx.pypa.io/stable/) and [poetry](https://python-poetry.org/) for package/environment management. On a Mac, the easiest way to install `pipx` is using [homebrew](https://brew.sh),
+We use [pipx](https://pipx.pypa.io/stable/) and [poetry](https://python-poetry.org/) for package/environment management. On a Mac, the easiest way to install `pipx` is using [Homebrew](https://brew.sh),
 
 ```
 brew install pipx
