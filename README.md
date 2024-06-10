@@ -41,6 +41,6 @@ The production environment is a RHEL8 VM on IST's network and is accessible via 
 ssh -J username@ssh.ist.psu.edu username@finhealth.ist.psu.edu
 ```
 
-This repo is contained at `/data/websites/finhealth`. Conventionally `.pipx` is located in a home directory. To meet IST requirements, `.pipx` is located at `/data/websites/.pipx`, including the virtual environments required by this project. See [pipx installation options](https://pipx.pypa.io/stable/installation/#installation-options) for more details on this.
+This repo is contained at `/data/websites/finhealth`. Conventionally `.pipx` is located in a home directory. To meet IST requirements, `.pipx/` is located at `/data/websites/.pipx`, including the virtual environments required by this project. See [pipx installation options](https://pipx.pypa.io/stable/installation/#installation-options) for more details on this.
 
 Apache is configured to use Poetry's venv as `WSGIPythonPath` and `WSGIDaemonProcess python-home` within the virtualhost definition. Questions about this should be directed to IST's helpdesk.
