@@ -15,7 +15,7 @@ from authentication.plaid_config import PlaidConfig
 @csrf_exempt
 def accounts_balance_get(request):
     try:
-        plaid_config = PlaidConfig(plaid.Environment.Sandbox)
+        plaid_config = PlaidConfig(plaid.Environment.Development)
         client = plaid_config.client()
         plaid_request = AccountsBalanceGetRequest(os.getenv('ACCESS_TOKEN'))
         response = client.accounts_balance_get(plaid_request)

@@ -1,4 +1,3 @@
-# Create your views here.
 import os
 import json
 
@@ -29,7 +28,7 @@ from .plaid_config import PlaidConfig
 
 from authentication.models import PlaidToken
 
-plaid_config = PlaidConfig(plaid.Environment.Sandbox)
+plaid_config = PlaidConfig(plaid.Environment.Development)
 client = plaid_config.client()
 
 def index(request):
@@ -42,7 +41,7 @@ def create_link_token(request):
         user_id = settings.PLAID_CLIENT_ID
         plaid_request = LinkTokenCreateRequest(
             products=[Products("transactions")],
-            client_name="Personal Finance App",
+            client_name="Finhealth Pilot",
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(
