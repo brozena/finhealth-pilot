@@ -4,7 +4,7 @@ This repo contains our pilot Django application intended to collect and annotate
 
 ## Local deployment
 
-First, clone our repo using `git clone https://github.com/brozena/finhealth-pilot.git`. The `sqlite` branch is configured to use sqlite3 (rather than postgresql) for easier local deployment. After cloning, navigate to the project's folder and use `git switch sqlite` before proceeding.
+First, clone our repo using `git clone https://github.com/brozena/finhealth-pilot.git`. The `sqlite` branch is configured to use Plaid's Sandbox and  sqlite3 (rather than postgresql) for easier local deployment. After cloning, navigate to the project's folder and use `git switch sqlite` before proceeding.
 
 We'll tend to stick to [feature branch workflows](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
 
