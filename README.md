@@ -23,7 +23,7 @@ Poetry can then be installed using `pipx install poetry`. Then run `poetry insta
 
 ### Environmental variables
 
-Environmental variables required by this project are listed in `finhealth/.env.example`. Copy that file to `finhealth/.env` and enter our Plaid API keys. These can be found in the Plaid dashboard -- get in touch with us if you need access to this. `.env` is listed in `.gitignore`; **do not** hardcode API keys or other authentication info. Note that the `dev` branch does not require postgres authentication details to run. 
+Environmental variables required by this project are listed in `finhealth/.env.example`. Copy that file to `finhealth/.env` and enter our Plaid API keys. These can be found in the Plaid dashboard -- get in touch with us if you need access to this. `.env` is listed in `.gitignore`; **do not** hardcode API keys or other authentication info. Note that the `sqlite` branch does not require postgres authentication details to run. 
 
 ### Starting Django locally
 
