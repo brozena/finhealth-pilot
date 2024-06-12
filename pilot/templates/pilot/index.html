@@ -22,6 +22,7 @@
             (async function() {
                 const fetchLinkToken = async () => {
                     const response = await fetch('/authentication/create_link_token', { method: 'POST' });
+		    console.log(response);
                     const responseJSON = await response.json();
                     console.log(responseJSON); // View link token data 
                     return responseJSON.link_token;

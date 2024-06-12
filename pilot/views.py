@@ -18,7 +18,7 @@ from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
 from plaid.model.accounts_get_response import AccountsGetResponse
 from authentication.plaid_config import PlaidConfig
 
-plaid_config = PlaidConfig(plaid.Environment.Sandbox)
+plaid_config = PlaidConfig(plaid.Environment.Development)
 plaid_client = plaid_config.client()
 
 

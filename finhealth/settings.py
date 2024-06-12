@@ -31,7 +31,8 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu']
-
+CSRF_TRUSTED_ORIGINS = ['https://finhealth.ist.psu.edu']
+CSRF_COOKIE_SAMESITE = None
 
 # Application definition
 
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'authentication',
     'balance',
     'transaction',
+    'adrf',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'finhealth.urls'
 
