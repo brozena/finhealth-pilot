@@ -1,4 +1,4 @@
-*.env
+**.env
 poetry.lock
 __pycache__
 plaid_config.py
