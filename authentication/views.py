@@ -5,6 +5,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import QueryDict
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_deny
+from asgiref.sync import iscoroutinefunction
+from django.utils.decorators import sync_and_async_middleware
 from django.conf import settings
 
 from rest_framework import status
@@ -14,6 +17,9 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+
+from adrf.decorators import api_view
+
 import environ
 
 import plaid
@@ -35,8 +41,9 @@ def index(request):
     context = {}
     return render(request, "index.html", context)
 
-@csrf_exempt
-def create_link_token(request):
+#@csrf_exempt
+@api_view(['POST'])
+async def create_link_token(request):
     try:
         user_id = settings.PLAID_CLIENT_ID
         plaid_request = LinkTokenCreateRequest(
@@ -54,7 +61,8 @@ def create_link_token(request):
         return json.dumps(e.body)
 
 @csrf_exempt
-def exchange_public_token(request):
+@api_view(['POST'])
+async def exchange_public_token(request):
     try:
         public_token = json.loads(request.body.decode('utf-8'))['public_token']
         plaid_request = ItemPublicTokenExchangeRequest(public_token=public_token)

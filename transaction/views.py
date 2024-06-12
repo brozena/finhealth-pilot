@@ -17,7 +17,7 @@ from plaid.model.transactions_get_response import TransactionsGetResponse
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from authentication.plaid_config import PlaidConfig
 
-plaid_config = PlaidConfig(plaid.Environment.Sandbox)
+plaid_config = PlaidConfig(plaid.Environment.Development)
 plaid_client = plaid_config.client()
 
 
