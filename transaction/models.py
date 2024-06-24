@@ -1,10 +1,30 @@
 import datetime
 from django.db import models
 
-# Create your models here.
+
+class PlaidItem(models.Model):
+    id = models.AutoField(primary_key=True)
+    access_token = models.CharField(max_length=200, unique=True)
+    item_id = models.CharField(max_length=200, unique=True)
+
+
+class Account(models.Model):
+    id = models.AutoField(primary_key=True)
+    plaid_account_id = models.CharField(max_length=200, null=True, unique=True)
+    balances = models.JSONField(null=True)
+    mask = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=200, null=True)
+    official_name = models.CharField(max_length=200, null=True)
+    subtype = models.CharField(max_length=200, null=True)
+    account_type = models.CharField(max_length=200, null=True)
+    participant_id = models.ForeignKey(pilot.PID, null=False, blank=False, default=None)
+    item = models.ForeignKey(PlaidItem, on_delete=models.CASCADE, default=None, null=True, blank=True)
 
 
 class Transaction(models.Model):
+    id = models.AutoField(primary_key=True)
+    participant_id = models.ForeignKey(pilot.PID)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     pending_transaction_id = models.CharField(max_length=1000, null=True, blank=True)
     category_id = models.CharField(max_length=500, null=True, blank=True)
     category = models.CharField(max_length=500, null=True, blank=True)
