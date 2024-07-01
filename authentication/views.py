@@ -34,7 +34,7 @@ from .plaid_config import PlaidConfig
 
 from authentication.models import PlaidToken
 
-plaid_config = PlaidConfig(plaid.Environment.Development)
+plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 client = plaid_config.client()
 
 def index(request):
