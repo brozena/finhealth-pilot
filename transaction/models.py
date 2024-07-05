@@ -1,11 +1,8 @@
 import datetime
 from django.db import models
 
-
-class PlaidItem(models.Model):
-    id = models.AutoField(primary_key=True)
-    access_token = models.CharField(max_length=200, unique=True)
-    item_id = models.CharField(max_length=200, unique=True)
+from pilot.models import PID
+from authentication.models import PlaidItem
 
 
 class Account(models.Model):
@@ -17,14 +14,14 @@ class Account(models.Model):
     official_name = models.CharField(max_length=200, null=True)
     subtype = models.CharField(max_length=200, null=True)
     account_type = models.CharField(max_length=200, null=True)
-    participant_id = models.ForeignKey(pilot.PID, null=False, blank=False, default=None)
+    participant_id = models.ForeignKey(PID, null=False, blank=False, default=None, on_delete=models.CASCADE)
     item = models.ForeignKey(PlaidItem, on_delete=models.CASCADE, default=None, null=True, blank=True)
 
 
 class Transaction(models.Model):
     id = models.AutoField(primary_key=True)
-    participant_id = models.ForeignKey(pilot.PID)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    participant_id = models.ForeignKey(PID, on_delete=models.CASCADE)
+    account_id = models.ForeignKey(Account, on_delete=models.CASCADE)
     pending_transaction_id = models.CharField(max_length=1000, null=True, blank=True)
     category_id = models.CharField(max_length=500, null=True, blank=True)
     category = models.CharField(max_length=500, null=True, blank=True)
