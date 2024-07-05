@@ -34,14 +34,13 @@ from .plaid_config import PlaidConfig
 
 from authentication.models import PlaidToken
 
-plaid_config = PlaidConfig(plaid.Environment.Development)
+plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 client = plaid_config.client()
 
 def index(request):
     context = {}
     return render(request, "index.html", context)
 
-#@csrf_exempt
 @api_view(['POST'])
 async def create_link_token(request):
     try:
@@ -60,7 +59,6 @@ async def create_link_token(request):
     except plaid.ApiException as e:
         return json.dumps(e.body)
 
-@csrf_exempt
 @api_view(['POST'])
 async def exchange_public_token(request):
     try:
