@@ -1,7 +1,6 @@
 import json
 import os
 
-# from datetime import datetime
 import datetime
 from dateutil.relativedelta import relativedelta
 from django.shortcuts import render
@@ -17,21 +16,18 @@ from plaid.model.transactions_get_response import TransactionsGetResponse
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from authentication.plaid_config import PlaidConfig
 
-plaid_config = PlaidConfig(plaid.Environment.Development)
+
+plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 plaid_client = plaid_config.client()
 
 
-
-@csrf_exempt
 def get_transactions(request):
     plaid_request = TransactionsGetRequest(
         access_token = os.getenv('ACCESS_TOKEN'),
-        start_date = (datetime.date.today() - relativedelta(months=1)),
+        start_date = (datetime.date.today() - relativedelta(months=24)),
         end_date = datetime.date.today(),
     )
     response = plaid_client.transactions_get(plaid_request)
     transactions = response['transactions']
     return JsonResponse(response.to_dict())
 
-
-    
