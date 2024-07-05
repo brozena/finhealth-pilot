@@ -38,6 +38,8 @@ from pilot.models import PID
 plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 client = plaid_config.client()
 
+pid = PID.objects.alatest('participant_id')
+
 @api_view(['POST'])
 async def create_link_token(request):
     try:
@@ -69,15 +71,14 @@ async def exchange_public_token(request):
         os.environ['ACCESS_TOKEN'] = access_token
         os.environ['ITEM_ID'] = item_id
 
-        #pid = PID.objects.get(id=
         plaid_item = None
 
         try:
             plaid_item = PlaidItem.get(item_id=item_id)
         except:
-            new_plaid_item = PlaidItem(pid=participant_id, access_token=access_token, item_id=item_id)
+            new_plaid_item = PlaidItem(participant_id=pid, access_token=access_token, item_id=item_id)
             new_plaid_item.save()
-            plaid_item = user.plaiditem_set.get(item_id=item_id)
+            plaid_item = PID.plaiditem_set.get(item_id=item_id)
 
         for account in accounts:
             try:
