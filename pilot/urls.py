@@ -7,7 +7,7 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='pilot/index.html')),
     path('transactions', TemplateView.as_view(template_name='pilot/transactions.html')),
     path('authentication/', include('authentication.urls')),
-    path('finance/balance/', include('balance.urls')),
-    path('finance/transactions/', include('transaction.urls')),
-    path('pid', views.pid, name='pid'),
+    path('balance/', include('balance.urls')),
+    path('transactions/', include('transaction.urls')),
+    path('get_pid/', views.get_pid, name='get_pid'),
 ]
