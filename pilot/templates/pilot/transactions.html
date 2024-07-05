@@ -6,101 +6,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         {% load static %}
         <link rel="stylesheet" href="{% static 'pilot/style.css' %}">
-        <title>Personal Finance App</title>
+        <title>Finhealth Prototype</title>
     </head>
     <body>
-        <div class="header">
-            <h1>Plaid Transactions</h1>
-        </div>    
-       <div class="finances">
-            <div class="accounts-column">
-                <h3>ACCOUNTS</h3>
-                <div class="accounts">
-                    <div id="account-list"></div>
-                </div>
-            </div>
-           <div class="transactions-column">
-                <h3>Transactions</h3>
-                <div class="account-transactions">
-                    <div id="transactions"></div>
-                </div>    
-            </div>
-
-        </div>
-
-        <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-        <script type="text/javascript">
-            (async function() {
-                const accountBalance = async () => {
-                    const response = await fetch('/finance/balance/account_balance', {method: 'POST'});
-                    const responseJSON = await response.json();
-                    return responseJSON;
-                }
-                const accountTransactions = async() => {
-                    const response = await fetch('/finance/transactions/get_transactions', {method: 'POST'});
-                    const responseJSON = await response.json();
-                    return responseJSON;
-                    return response;
-                }
-                const balanceDetails = await accountBalance();
-                const transactionsDetails = await accountTransactions();
-                console.log(transactionsDetails);
-
-                var balance_data = '';
-                balanceDetails.accounts.forEach(account => displayBalance(account));
-
-                // Extracts balance details from account, converts to html 
-                function displayBalance(account) {
-                    balance_data += '<div class="account-item" id="' +
-                        account.account_id +
-                        '">' +
-                        account.name +
-                        ' (' +
-                        (account.balances.available ? account.balances.available : 0) +
-                        '/' +
-                        (account.balances.current ? account.balances.current : 0) +
-                        ' ' +
-                        account.balances.iso_currency_code +
-                        ')' +
-                        '</div>';
-                    
-                }
-                document.getElementById('account-list').innerHTML = balance_data;
-                                
-                document.getElementById('account-list').addEventListener('click', function(event) {
-                    var transactions_data = '';
-                    var target_account_id = event.target.id;
-                    
-                    var target_transactions = [];
-                    var all_transactions = transactionsDetails.transactions;
-
-                    all_transactions.forEach(transaction => {
-                        if (transaction.account_id == target_account_id) {
-                            target_transactions.push(transaction);
-                        }
-                    });
-
-                    target_transactions.forEach(transaction => displayTransactions(transaction));
-
-                    function displayTransactions(transaction) {
-                        transactions_data += '<div class="transactions-item' +
-                            (transaction.amount < 0 ? '">' : ' transactions-item-negative">') +
-                            transaction.date +
-                            ' ' +
-                            -transaction.amount +
-                            ' ' +
-                            transaction.iso_currency_code +
-                            ' - ' +
-                            transaction.name +
-                            '</div>'
-                    }
-                    document.getElementById('transactions').innerHTML = transactions_data;
-                });
-            })();
-
-
-
-
-        </script>
-    </body>
+	{% csrf_token %}
+	{{ data }}
+	<table>
+		{% for transactions in data %}
+			<tr>
+				<td>{{ transactions.date }}</td>
+				<td>{{ transactions.name }}</td>
+				<td>{{ transactions.category }}</td>
+				<td>{{ transactions.amount }}</td>
+			</tr>	
+		{% endfor %}
+	</table>
+   </body>
 </html>

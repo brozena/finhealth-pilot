@@ -20,7 +20,7 @@ from authentication.plaid_config import PlaidConfig
 plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 plaid_client = plaid_config.client()
 
-
+@csrf_exempt
 def get_transactions(request):
     plaid_request = TransactionsGetRequest(
         access_token = os.getenv('ACCESS_TOKEN'),
@@ -28,6 +28,7 @@ def get_transactions(request):
         end_date = datetime.date.today(),
     )
     response = plaid_client.transactions_get(plaid_request)
-    transactions = response['transactions']
-    return JsonResponse(response.to_dict())
+    data = response.to_dict()
 
+    #return render(request, 'pilot/transactions.html', data) 
+    return JsonResponse(data)
