@@ -3,3 +3,5 @@ poetry.lock
 __pycache__
 __init__.py
 plaid_config.py
+db.sqlite3
+**.swp

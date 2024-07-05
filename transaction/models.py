@@ -1,6 +1,9 @@
 import datetime
 from django.db import models
+
 from pilot.models import PID
+from authentication.models import PlaidItem
+
 
 class PlaidItem(models.Model):
     id = models.AutoField(primary_key=True)
