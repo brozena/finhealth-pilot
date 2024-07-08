@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 
 import plaid
 from plaid.exceptions import ApiException
@@ -20,7 +20,7 @@ from authentication.plaid_config import PlaidConfig
 plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 plaid_client = plaid_config.client()
 
-@csrf_exempt
+@csrf_protect
 def get_transactions(request):
     plaid_request = TransactionsGetRequest(
         access_token = os.getenv('ACCESS_TOKEN'),
