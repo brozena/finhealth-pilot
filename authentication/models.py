@@ -1,11 +1,13 @@
 from django.db import models
 from django.conf import settings
 
-# Create your models here.
+from pilot.models import PID
 
-class PlaidToken(models.Model):
+
+class PlaidItem(models.Model):
+    participant_id = models.ForeignKey(PID, on_delete=models.CASCADE)
     access_token = models.CharField(max_length=64, default='')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    item_id = models.CharField(max_length=200, unique=True)
 
     class Meta:
-        unique_together = ('access_token', 'user')
+        unique_together = ('access_token', 'participant_id')
