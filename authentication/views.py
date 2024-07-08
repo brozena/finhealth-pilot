@@ -32,13 +32,14 @@ from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
 
-from authentication.models import PlaidItem
+from authentication.models import 
+from transaction.models import PlaidItem, Account, Transaction
 from pilot.models import PID
 
 plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 client = plaid_config.client()
 
-pid = PID.objects.alatest('participant_id')
+#pid = PID.objects.alatest('participant_id')
 
 @api_view(['POST'])
 async def create_link_token(request):
