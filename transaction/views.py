@@ -16,6 +16,12 @@ from plaid.model.transactions_get_response import TransactionsGetResponse
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from authentication.plaid_config import PlaidConfig
 
+<<<<<<< Updated upstream
+=======
+from pilot.models import PID
+from authentication.models import PlaidItem
+from transaction.models import Account, Transaction
+>>>>>>> Stashed changes
 
 plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 plaid_client = plaid_config.client()
