@@ -32,7 +32,8 @@ from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
 
-from transaction.models import PlaidItem, Account, Transaction
+from authentication.models import PlaidItem
+from transaction.models import Account, Transaction
 from pilot.models import PID
 
 plaid_config = PlaidConfig(plaid.Environment.Sandbox)

@@ -14,18 +14,17 @@ class Account(models.Model):
     official_name = models.CharField(max_length=200, null=True)
     subtype = models.CharField(max_length=200, null=True)
     account_type = models.CharField(max_length=200, null=True)
-    participant_id = models.ForeignKey(PID, null=False, blank=False, default=None, on_delete=models.CASCADE)
-    item = models.ForeignKey(PlaidItem, on_delete=models.CASCADE, default=None, null=True, blank=True)
+    participant_id = models.ForeignKey("PID.participant_id", on_delete=models.CASCADE)
+    item = models.ForeignKey("PlaidItem.item_id", on_delete=models.CASCADE)
 
 
 class Transaction(models.Model):
     id = models.AutoField(primary_key=True)
-    participant_id = models.ForeignKey(PID, on_delete=models.CASCADE)
-    account_id = models.ForeignKey(Account, on_delete=models.CASCADE)
+    participant_id = models.ForeignKey("PID.participant_id", on_delete=models.CASCADE)
+    account_id = models.ForeignKey("Account.plaid_account_id", on_delete=models.CASCADE)
     pending_transaction_id = models.CharField(max_length=1000, null=True, blank=True)
     category_id = models.CharField(max_length=500, null=True, blank=True)
     category = models.CharField(max_length=500, null=True, blank=True)
-    location = models.CharField(max_length=500, null=True, blank=True)
     payment_meta = models.CharField(max_length=10000, null=True, blank=True)
     account_owner = models.CharField(max_length=500, null=True, blank=True)
     name = models.CharField(max_length=500, null=True, blank=True)
