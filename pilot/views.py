@@ -33,6 +33,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.accounts_get_request_options import AccountsGetRequestOptions
+from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
@@ -83,13 +84,13 @@ def get_access_token(request):
     body_data = json.loads(request.body.decode())
     public_token = body_data["public_token"]
 
-    exchange_response = ItemPublicTokenExchangeRequest(public_token=public_token)
-    response = client.item_public_token_exchange(exchange_response) 
-    access_token = response['access_token']
+    exchange_request = ItemPublicTokenExchangeRequest(public_token=public_token)
+    exchange_response = client.item_public_token_exchange(exchange_request) 
+    item_id = exchange_response['item_id']
+    access_token = exchange_response['access_token']
     account_request = AccountsGetRequest(access_token=access_token)
     account_response = client.accounts_get(account_request)
     accounts = account_response['accounts']
-    item_id = response['item_id']
 
     user = request.user
     plaid_item = None
@@ -135,23 +136,16 @@ def get_transactions(request):
         try:
             access_token = item.access_token
 
-            data = {
-                'client_id': PLAID_CLIENT_ID,
-                'access_token': access_token,
-                'secret': PLAID_SECRET,
-                'start_date': start_date,
-                'end_date': end_date
-            }
+            plaid_request = TransactionsGetRequest(access_token=access_token,
+                                start_date=(datetime.date.today() - relativedelta(months=24)),
+                                end_date=datetime.date.today(),)
 
-            response = client.Transactions.get(access_token,
-                                start_date=start_date,
-                                end_date=end_date)
+            transaction_response = client.transactions_get(plaid_request)
+            transactions = transaction_response['transactions']
 
-            transactions = response['transactions']
-                
             account_request = AccountsGetRequest(access_token=access_token)
-            account_response = client.accounts_get(request)
-            accounts = response['accounts']
+            account_response = client.accounts_get(account_request)
+            accounts = account_response['accounts']
 
             error = None
 
@@ -171,20 +165,20 @@ def get_transactions(request):
                     new_acct.user = user
                     new_acct.save()
 
-            while len(transactions) < response['total_transactions']:
-                response = client.Transactions.get(access_token,
-                                        start_date=start_date,
-                                        end_date=end_date,
-                                        offset=len(transactions)
-                                        )
+            while len(transactions) < transaction_response['total_transactions']:
+                plaid_request = TransactionsGetRequest(access_token,
+                                    start_date=(datetime.date.today() - relativedelta(months=24)),
+                                    end_date=datetime.date.today(),)
+
+                transaction_response = client.transactions_get(plaid_request)
+                item_id = exchange_response['item_id']
+
                 transactions.extend(response['transactions'])
             
 
             for transaction in transactions:
                 try:
                     existing_trans = user.transaction_set.get(transaction_id=transaction['transaction_id'])
-                    builtin_cat = Category.objects.get(pk=transaction['builtin_cat_id'])
-                    existing_trans.builtin_category = builtin_cat
                     existing_trans.save()
                     continue
                 except Transaction.DoesNotExist:
@@ -194,12 +188,9 @@ def get_transactions(request):
                     new_trans.amount = transaction['amount']
                     new_trans.authorized_date = transaction['authorized_date']
 
-                    builtin_cat = Category.objects.get(pk=transaction['builtin_cat_id'])
-                    new_trans.builtin_category = builtin_cat
-
                     new_trans.category = transaction['category']
                     new_trans.category_id = transaction['category_id']
-                    new_trans.date = datetime.strptime(transaction['date'], '%Y-%m-%d')
+                    new_trans.date = datetime.datetime.strptime(transaction['date'], '%Y-%m-%d')
                     new_trans.iso_currency_code = transaction['iso_currency_code']
                     new_trans.merchant_name = transaction['merchant_name']
                     new_trans.name = transaction['name']
@@ -216,6 +207,6 @@ def get_transactions(request):
         except Exception as e:
                 print(e)
                 # error = {'display_message': 'You need to link your account.' }
-        json.dumps(transactions, sort_keys=True, indent=4)
+        #json.dumps(transactions, sort_keys=True, indent=4)
 
     return render(request, 'pilot/transactions.html', {'transactions': transactions})

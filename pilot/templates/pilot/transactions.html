@@ -23,23 +23,8 @@
       <td class="transaction-td-date">{{transaction.date}}</td>
       <td class="transaction-td-name">{{transaction.name}}</td>
       <td class="transaction-td-amount">{{transaction.amount}}</td>
-      <td class="transaction-td-category">
-        <select
-          name="builtin_cat_id"
-          id="category-select"
-          onchange="updateTransCat('{{transaction.id}}', this.value);"
-        >
-          <option value="{{transaction.builtin_category.id}}">
-            {{transaction.builtin_category.description}}
-          </option>
-          {% for category in builtin_categories %}
-          <option value="{{category.id}}">{{ category.description }}</option>
-          {% endfor %}
-        </select>
-      </td>
-      <td class="transaction-td-account">
-        {{transaction.account.official_name}}
-      </td>
+      <td class="transaction-td-category">{{transaction.category}}</td>
+      <td class="transaction-td-account">{{transaction.account.name}}</td>
     </tr>
     {% endfor %}
   </table>
