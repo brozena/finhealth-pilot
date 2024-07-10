@@ -10,16 +10,38 @@
     </head>
     <body>
 	{% csrf_token %}
-	{{ data }}
-	<table>
-		{% for transactions in data %}
-			<tr>
-				<td>{{ transactions.date }}</td>
-				<td>{{ transactions.name }}</td>
-				<td>{{ transactions.category }}</td>
-				<td>{{ transactions.amount }}</td>
-			</tr>	
-		{% endfor %}
-	</table>
+  <table>
+    <tr class="transaction-list-header">
+      <th>Date</th>
+      <th>Name</th>
+      <th>Amount</th>
+      <th>Category</th>
+      <th>Account</th>
+    </tr>
+    {% for transaction in transactions %}
+    <tr class="transaction-row" id="trans-id" data-transid="{{transaction.id}}">
+      <td class="transaction-td-date">{{transaction.date}}</td>
+      <td class="transaction-td-name">{{transaction.name}}</td>
+      <td class="transaction-td-amount">{{transaction.amount}}</td>
+      <td class="transaction-td-category">
+        <select
+          name="builtin_cat_id"
+          id="category-select"
+          onchange="updateTransCat('{{transaction.id}}', this.value);"
+        >
+          <option value="{{transaction.builtin_category.id}}">
+            {{transaction.builtin_category.description}}
+          </option>
+          {% for category in builtin_categories %}
+          <option value="{{category.id}}">{{ category.description }}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td class="transaction-td-account">
+        {{transaction.account.official_name}}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
    </body>
 </html>

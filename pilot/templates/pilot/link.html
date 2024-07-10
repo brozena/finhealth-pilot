@@ -16,13 +16,12 @@
         <div class="plaid-link-">
             <button id="link-button">Link Account</button>    
         </div>
-        
         <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
         <script type="text/javascript">
             (async function() {
                 const fetchLinkToken = async () => {
-                    const response = await fetch('/authentication/create_link_token', { method: 'POST' });
+                    const response = await fetch('/create_link_token', { method: 'POST' });
 		    console.log(response);
                     const responseJSON = await response.json();
                     console.log(responseJSON); // View link token data 
@@ -37,11 +36,11 @@
                         // 2a. Send the public_token to your app server.
                         // The onSuccess function is called when the user has successfully
                         // authenticated and selected an account to use.
-                        await fetch('/authentication/exchange_public_token', {
+                        await fetch('/get_access_token', {
                             method: 'POST',
-                            body: JSON.stringify({ public_token: public_token }),
+                            body: JSON.stringify({ public_token: public_token})
                         });
-                        location.href = '/transactions/get_transactions';
+                        location.href = '/get_transactions';
                     },
 
                     onExit: async function(err, metadata) {
