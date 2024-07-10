@@ -1,10 +1,13 @@
 import os
 import plaid
 
-from dotenv import load_dotenv
 from plaid.api import plaid_api
 
-load_dotenv()
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
+
 
 class PlaidConfig():
     def __init__(self, env):
@@ -14,8 +17,8 @@ class PlaidConfig():
         configuration = plaid.Configuration(
             host=self.env,
             api_key={
-                'clientId': os.getenv('PLAID_CLIENT_ID'),
-                'secret': os.getenv('PLAID_SECRET')
+                'clientId': env('PLAID_CLIENT_ID'),
+                'secret': env('PLAID_SECRET')
             }
         )
         api_client = plaid.ApiClient(configuration)

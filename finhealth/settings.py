@@ -12,13 +12,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import environ
+import os
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # reading .env file
 env = environ.Env()
 environ.Env.read_env()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -44,10 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pilot',
-    'authentication',
-    'balance',
-    'transaction',
-    'adrf',
 ]
 
 MIDDLEWARE = [
@@ -87,12 +84,8 @@ WSGI_APPLICATION = 'finhealth.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env("DATABASE_NAME"),
-        'USER': env("DATABASE_USER"), 
-        'PASSWORD': env("DATABASE_PASSWORD"),
-        'HOST': env("DATABASE_HOST"),
-        'PORT': env("DATABASE_PORT"),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': str(BASE_DIR / "db.sqlite3"), 
     }
 }
 
@@ -140,9 +133,10 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'auth.User'
 
 # Plaid API keys
 
-PLAID_CLIENT_ID = env("PLAID_CLIENT_ID")
-PLAID_SECRET = env("PLAID_SECRET")
-PLAID_LINK_TOKEN = env("PLAID_LINK_TOKEN")
+PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
+PLAID_SECRET = os.getenv("PLAID_SECRET")
+PLAID_LINK_TOKEN = os.getenv("PLAID_LINK_TOKEN")
