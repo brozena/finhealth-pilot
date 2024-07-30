@@ -5,18 +5,17 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 
+
 class PlaidItem(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, blank=False, on_delete=models.CASCADE, default=None)
     access_token = models.CharField(max_length=64, default='', unique=True)
     item_id = models.CharField(max_length=200, unique=True)
 
-    class Meta:
-        unique_together = ('access_token', 'user')
 
 class Account(models.Model):
     id = models.AutoField(primary_key=True)
-    plaid_account_id = models.CharField(max_length=200, null=True, unique=True)
+    plaid_account_id = models.CharField(max_length=200, null=True, unique=False)
     balances = models.FloatField(default=0)
     mask = models.CharField(max_length=200, null=True)
     name = models.CharField(max_length=200, null=True)

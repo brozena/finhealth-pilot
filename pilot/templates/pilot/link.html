@@ -31,7 +31,7 @@
                 const configs = {
                     // 1. Pass a new link_token to Link.
                     token: await fetchLinkToken(),
-                    onSuccess: async function(public_token, metadata) {
+		    onSuccess: async function(public_token, metadata) {
                         console.log(public_token)
                         // 2a. Send the public_token to your app server.
                         // The onSuccess function is called when the user has successfully
