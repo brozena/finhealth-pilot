@@ -108,7 +108,7 @@ def get_transactions(request):
     user = request.user
 
     transactions = []
-    item = user.plaiditem_set.latest('id')
+    item = user.plaiditem_set.latest('created')
 
     access_token = item.access_token
 
