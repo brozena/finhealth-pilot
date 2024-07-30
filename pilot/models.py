@@ -11,6 +11,7 @@ class PlaidItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, blank=False, on_delete=models.CASCADE, default=None)
     access_token = models.CharField(max_length=64, default='', unique=True)
     item_id = models.CharField(max_length=200, unique=True)
+    created = models.DateTimeField(auto_now=True)
 
 
 class Account(models.Model):
