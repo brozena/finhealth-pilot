@@ -1,11 +1,11 @@
 import json
+import time
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
 
 import datetime as dt
-from dateutil.relativedelta import relativedelta
 
 from django.http import JsonResponse
 from django.http import QueryDict
@@ -29,6 +29,7 @@ import plaid
 from plaid.exceptions import ApiException
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_transactions import LinkTokenTransactions
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.item_remove_request import ItemRemoveRequest
@@ -73,6 +74,9 @@ def create_link_token(request):
     user_id = settings.PLAID_CLIENT_ID
     plaid_request = LinkTokenCreateRequest(
             products=[Products("transactions")],
+            transactions=LinkTokenTransactions(
+                days_requested=730
+            ),
             client_name="Finhealth Pilot",
             country_codes=[CountryCode('US')],
             language='en',
@@ -106,6 +110,8 @@ def get_access_token(request):
 
 def get_transactions(request):
     user = request.user
+    END_DATE = dt.date.today()
+    START_DATE = (END_DATE - dt.timedelta(days*(365*2)))
 
     transactions = []
     item = user.plaiditem_set.latest('created')
@@ -113,12 +119,14 @@ def get_transactions(request):
     access_token = item.access_token
 
     request = TransactionsGetRequest(access_token=access_token,
-                        start_date=(dt.date.today() - relativedelta(months=24)),
-                        end_date=dt.date.today(), options=TransactionsGetRequestOptions(
+                        start_date=START_DATE,
+                        end_date=END_DATE,
+                        options=TransactionsGetRequestOptions(
                             include_original_description=True)
                         )
 
     response = client.transactions_get(request)
+
     transactions = response['transactions']
     accounts = response['accounts']
 
