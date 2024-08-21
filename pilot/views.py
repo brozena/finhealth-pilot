@@ -127,6 +127,10 @@ def get_transactions(request):
 
     response = client.transactions_get(request)
 
+    # wait 2 minutes for Plaid Transactions API. Refactor to listen for HISTORICAL_UPDATE webhook in future.
+    time.sleep(120)
+    continue
+
     transactions = response['transactions']
     accounts = response['accounts']
 
