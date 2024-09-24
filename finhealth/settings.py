@@ -29,7 +29,7 @@ environ.Env.read_env()
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False 
 
 ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu']
 CSRF_TRUSTED_ORIGINS = ['https://finhealth.ist.psu.edu']

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
 
-import datetime as dt
+from datetime import datetime, timedelta
 
 from django.http import JsonResponse
 from django.http import QueryDict
@@ -38,7 +38,6 @@ from plaid.model.transactions_get_request_options import TransactionsGetRequestO
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
-
 from .models import Account, Transaction, PlaidItem
 
 plaid_config = PlaidConfig(plaid.Environment.Production)
@@ -110,8 +109,8 @@ def get_access_token(request):
 
 def get_transactions(request):
     user = request.user
-    END_DATE = dt.date.today()
-    START_DATE = (END_DATE - dt.timedelta(days*(365*2)))
+    END_DATE = datetime.now().date()
+    START_DATE = (datetime.now() + timedelta(weeks=(-4*24))).date()
 
     transactions = []
     item = user.plaiditem_set.latest('created')
@@ -127,9 +126,8 @@ def get_transactions(request):
 
     response = client.transactions_get(request)
 
-    # wait 2 minutes for Plaid Transactions API. Refactor to listen for HISTORICAL_UPDATE webhook in future.
-    time.sleep(120)
-    continue
+    # wait 30 seconds for Plaid Transactions API. Rework to listen for Plaid's HISTORICAL_UPDATE webhook in future.
+    time.sleep(30)
 
     transactions = response['transactions']
     accounts = response['accounts']
@@ -156,7 +154,7 @@ def get_transactions(request):
         new_trans.authorized_date = transaction['authorized_date']
         new_trans.category = transaction['category']
         new_trans.category_id = transaction['category_id']
-        new_trans.date = dt.datetime.strftime(transaction['date'], '%Y-%m-%d')
+        new_trans.date = datetime.strftime(transaction['date'], '%Y-%m-%d')
         new_trans.iso_currency_code = transaction['iso_currency_code']
         new_trans.merchant_name = transaction['merchant_name']
         new_trans.name = transaction['name']
