@@ -4,25 +4,25 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
+from asgiref.sync import sync_to_async
 
-import datetime as dt
+from datetime import datetime, timedelta
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.http import QueryDict
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_deny
-from asgiref.sync import iscoroutinefunction, sync_to_async 
-from django.utils.decorators import sync_and_async_middleware
 from django.conf import settings
 
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 
+import logging, ngrok
+
+from adrf.views import APIView
 from adrf.decorators import api_view
 
 import plaid
@@ -38,7 +38,6 @@ from plaid.model.transactions_get_request_options import TransactionsGetRequestO
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
-
 from .models import Account, Transaction, PlaidItem
 
 plaid_config = PlaidConfig(plaid.Environment.Production)
@@ -82,7 +81,8 @@ def create_link_token(request):
             language='en',
             user=LinkTokenCreateRequestUser(
                 client_user_id=user_id
-            )
+            ),
+            webhook="https://ladybug-renewed-monthly.ngrok-free.app/webhook_transactions/"
         )
     plaid_response = client.link_token_create(plaid_request)
     return JsonResponse(plaid_response.to_dict())
@@ -108,13 +108,29 @@ def get_access_token(request):
     return JsonResponse(exchange_response.to_dict())
 
 
-def get_transactions(request):
+@api_view(['POST'])
+async def webhook_transactions(request):
+    webhook = json.loads(request.body.decode())
+    item_id = webhook['item_id']
+
+    if (webhook['webhook_type'] == "TRANSACTIONS") & (webhook['webhook_code'] == "HISTORICAL_UPDATE"):
+        print(f"{webhook['new_transactions']} new transactions available to be retrieved.")
+        get_transactions(item_id)
+        
+        return HttpResponse(status=202)
+    else: 
+        print(f"Unhandled event type: {webhook['webhook_type']}, {webhook['webhook_code']}")
+
+    return HttpResponse(status=200)
+
+def get_transactions(request, item_id):
     user = request.user
-    END_DATE = dt.date.today()
-    START_DATE = (END_DATE - dt.timedelta(days*(365*2)))
+    END_DATE = datetime.now().date()
+    START_DATE = (datetime.now() + timedelta(weeks=(-4*24))).date()
 
     transactions = []
-    item = user.plaiditem_set.latest('created')
+    item = item_id
+    #item = user.plaiditem_set.latest('created')
 
     access_token = item.access_token
 
@@ -152,7 +168,7 @@ def get_transactions(request):
         new_trans.authorized_date = transaction['authorized_date']
         new_trans.category = transaction['category']
         new_trans.category_id = transaction['category_id']
-        new_trans.date = dt.datetime.strftime(transaction['date'], '%Y-%m-%d')
+        new_trans.date = datetime.strftime(transaction['date'], '%Y-%m-%d')
         new_trans.iso_currency_code = transaction['iso_currency_code']
         new_trans.merchant_name = transaction['merchant_name']
         new_trans.name = transaction['name']
