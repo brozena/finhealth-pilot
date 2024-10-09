@@ -4,25 +4,25 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
+from asgiref.sync import sync_to_async
 
 from datetime import datetime, timedelta
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.http import QueryDict
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_deny
-from asgiref.sync import iscoroutinefunction, sync_to_async 
-from django.utils.decorators import sync_and_async_middleware
 from django.conf import settings
 
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 
+import logging, ngrok
+
+from adrf.views import APIView
 from adrf.decorators import api_view
 
 import plaid
@@ -81,7 +81,8 @@ def create_link_token(request):
             language='en',
             user=LinkTokenCreateRequestUser(
                 client_user_id=user_id
-            )
+            ),
+            webhook="https://ladybug-renewed-monthly.ngrok-free.app/webhook_transactions/"
         )
     plaid_response = client.link_token_create(plaid_request)
     return JsonResponse(plaid_response.to_dict())
@@ -107,13 +108,29 @@ def get_access_token(request):
     return JsonResponse(exchange_response.to_dict())
 
 
-def get_transactions(request):
+@api_view(['POST'])
+async def webhook_transactions(request):
+    webhook = json.loads(request.body.decode())
+    item_id = webhook['item_id']
+
+    if (webhook['webhook_type'] == "TRANSACTIONS") & (webhook['webhook_code'] == "HISTORICAL_UPDATE"):
+        print(f"{webhook['new_transactions']} new transactions available to be retrieved.")
+        get_transactions(item_id)
+        
+        return HttpResponse(status=202)
+    else: 
+        print(f"Unhandled event type: {webhook['webhook_type']}, {webhook['webhook_code']}")
+
+    return HttpResponse(status=200)
+
+def get_transactions(request, item_id):
     user = request.user
     END_DATE = datetime.now().date()
     START_DATE = (datetime.now() + timedelta(weeks=(-4*24))).date()
 
     transactions = []
-    item = user.plaiditem_set.latest('created')
+    item = item_id
+    #item = user.plaiditem_set.latest('created')
 
     access_token = item.access_token
 
@@ -125,9 +142,6 @@ def get_transactions(request):
                         )
 
     response = client.transactions_get(request)
-
-    # wait 30 seconds for Plaid Transactions API. Rework to listen for Plaid's HISTORICAL_UPDATE webhook in future.
-    time.sleep(30)
 
     transactions = response['transactions']
     accounts = response['accounts']

@@ -29,9 +29,9 @@ environ.Env.read_env()
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False 
+DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu']
+ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu', 'ladybug-renewed-monthly.ngrok-free.app']
 CSRF_TRUSTED_ORIGINS = ['https://finhealth.ist.psu.edu']
 CSRF_COOKIE_SAMESITE = None
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'adrf',
     'pilot',
 ]
 
@@ -113,6 +114,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -144,3 +147,6 @@ AUTH_USER_MODEL = 'auth.User'
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
 PLAID_LINK_TOKEN = os.getenv("PLAID_LINK_TOKEN")
+
+# ngrok auth
+NGROK_AUTHTOKEN = os.getenv("NGROK_AUTHTOKEN")
