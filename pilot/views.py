@@ -25,10 +25,12 @@ from rest_framework.views import APIView
 
 from adrf.decorators import api_view
 
+
 import plaid
 from plaid.exceptions import ApiException
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_transactions import LinkTokenTransactions
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.item_remove_request import ItemRemoveRequest
@@ -37,10 +39,11 @@ from plaid.model.transactions_get_request_options import TransactionsGetRequestO
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
-
 from .models import Account, Transaction, PlaidItem
 
-plaid_config = PlaidConfig(plaid.Environment.Sandbox)
+from .tasks import process_webhook
+
+plaid_config = PlaidConfig(plaid.Environment.Production)
 client = plaid_config.client()
 
 def index(request):
@@ -65,6 +68,7 @@ def create_user(request):
 
     return render(request, 'pilot/link.html')
 
+
 @csrf_exempt
 def create_link_token(request):
     user = request.user
@@ -72,12 +76,16 @@ def create_link_token(request):
     user_id = settings.PLAID_CLIENT_ID
     plaid_request = LinkTokenCreateRequest(
             products=[Products("transactions")],
+            transactions=LinkTokenTransactions(
+                days_requested=730
+            ),
             client_name="Finhealth Pilot",
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(
                 client_user_id=user_id
-            )
+            ),
+            webhook="https://ladybug-renewed-monthly.ngrok-free.app/webhook_transactions/"
         )
     plaid_response = client.link_token_create(plaid_request)
     return JsonResponse(plaid_response.to_dict())

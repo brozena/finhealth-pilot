@@ -2,6 +2,7 @@ from .models import Account, Transaction, PlaidItem
 
 from celery import shared_task
 
+@shared_task
 def process_webhook(data):
     item_id = data['item_id']
     access_token = PlaidItem.objects.filter(item_id=item_id).values_list('access_token')[0]

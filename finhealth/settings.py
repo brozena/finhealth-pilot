@@ -31,7 +31,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu']
+ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu', 'ladybug-renewed-monthly.ngrok-free.app']
 CSRF_TRUSTED_ORIGINS = ['https://finhealth.ist.psu.edu']
 CSRF_COOKIE_SAMESITE = None
 
@@ -146,6 +146,9 @@ PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
 PLAID_LINK_TOKEN = os.getenv("PLAID_LINK_TOKEN")
 
+# ngrok auth
+
+NGROK_AUTHTOKEN = os.getenv("NGROK_AUTHTOKEN")
 
 # Celery config
 
