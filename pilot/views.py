@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
+import logging
 
 import datetime as dt
 from dateutil.relativedelta import relativedelta
@@ -41,7 +42,9 @@ from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
 from .models import Account, Transaction, PlaidItem
 
-from .tasks import process_webhook
+from pilot.tasks import process_webhook
+
+logger = logging.getLogger(__name__)
 
 plaid_config = PlaidConfig(plaid.Environment.Production)
 client = plaid_config.client()
@@ -115,13 +118,17 @@ def get_access_token(request):
 def webhook_transactions(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            data = json.loads(request.body.decode())
             process_webhook.delay(data)
+            
+            logger.debug(f"Webhook received: {request.body}")
+
             return JsonResponse({'status': 'Webhook received.'}, status=200)
         except:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 def get_transactions(request):
     user = request.user
