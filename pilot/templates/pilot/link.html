@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+CTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         {% load static %}
-	<link rel="stylesheet" href="{% static 'pilot/style.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'pilot/style.css' %}">
         <title>Login</title>
     </head>
     <body>
@@ -21,8 +21,8 @@
         <script type="text/javascript">
             (async function() {
                 const fetchLinkToken = async () => {
-                    const response = await fetch('/create_link_token', { method: 'POST' });
-		    console.log(response);
+                    const response = await fetch('/create_link_token/', { method: 'POST' });
+            console.log(response);
                     const responseJSON = await response.json();
                     console.log(responseJSON); // View link token data 
                     return responseJSON.link_token;
@@ -31,16 +31,18 @@
                 const configs = {
                     // 1. Pass a new link_token to Link.
                     token: await fetchLinkToken(),
-                    onSuccess: async function(public_token, metadata) {
+          	    onSuccess: async function(public_token, metadata) {
                         console.log(public_token)
                         // 2a. Send the public_token to your app server.
                         // The onSuccess function is called when the user has successfully
                         // authenticated and selected an account to use.
-                        await fetch('/get_access_token', {
+                        await fetch('/get_access_token/', {
                             method: 'POST',
                             body: JSON.stringify({ public_token: public_token})
                         });
-                        location.href = '/get_transactions';
+                        await fetch('/webhook_transactions/', {
+				method: 'POST'
+			});
                     },
 
                     onExit: async function(err, metadata) {
@@ -70,3 +72,4 @@
         </script>    
     </body>
 </html>
+

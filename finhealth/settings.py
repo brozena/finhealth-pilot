@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'celery',
     'pilot',
 ]
 
@@ -84,8 +85,12 @@ WSGI_APPLICATION = 'finhealth.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / "db.sqlite3"), 
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env("DATABASE_NAME"), 
+        'USER': env("DATABASE_USER"),     
+        'PASSWORD': env("DATABASE_PASSWORD"),
+        'HOST': env("DATABASE_HOST"),
+        'PORT': env("DATABASE_PORT"),
     }
 }
 
@@ -140,3 +145,8 @@ AUTH_USER_MODEL = 'auth.User'
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
 PLAID_LINK_TOKEN = os.getenv("PLAID_LINK_TOKEN")
+
+
+# Celery config
+
+CELERY_BROKER_URL = 'amqp://localhost'

@@ -50,15 +50,20 @@ def index(request):
 @csrf_exempt
 def create_user(request):
     username=request.POST['username']
-    user = User.objects.create(username=username)
-    user.save()
+    
+    # allow repeated usernames/participant IDs in case of multiple accounts
+    if User.objects.filter(username=username).exists():
+        user = User.objects.filter(username=username).get()
+        login(request, user) 
+    else: 
+        user = User.objects.create(username=username)
+        user.save()
 
-    # apply .filter() to avoid setting a password
-    user = User.objects.filter(username=username).get()
-    login(request, user)
+        # apply .filter() to avoid setting a password
+        user = User.objects.filter(username=username).get()
+        login(request, user)
 
     return render(request, 'pilot/link.html')
-
 
 @csrf_exempt
 def create_link_token(request):
@@ -97,6 +102,18 @@ def get_access_token(request):
 
     return JsonResponse(exchange_response.to_dict())
 
+
+@csrf_exempt
+def webhook_transactions(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            process_webhook.delay(data)
+            return JsonResponse({'status': 'Webhook received.'}, status=200)
+        except:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def get_transactions(request):
     user = request.user
