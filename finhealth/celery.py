@@ -16,7 +16,7 @@ app = Celery('finhealth')
 app.config_from_object(f'django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django apps.
-app.autodiscover_tasks(['pilot'])
+app.autodiscover_tasks()
 
 
 @app.task(bind=True, ignore_result=True)
