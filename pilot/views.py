@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.views.decorators.csrf import csrf_exempt
 import logging
 
@@ -118,6 +118,9 @@ def get_access_token(request):
 @csrf_exempt
 def webhook_transactions(request):
     if request.method == 'POST':
+
+        print(request.user)
+
         try:
             data = json.loads(request.body.decode())
             process_webhook.delay(data)

@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from plaid.model.transactions_get_request import TransactionsGetRequest
@@ -6,9 +8,10 @@ from plaid.model.item_remove_request import ItemRemoveRequest
 
 import datetime as dt
 
+@login_required
 def get_transactions(data, item_id, access_token):
 
-    user = user.plaiditem_set.get('user')
+    user = request.user
 
     transactions = []
     plaid_items = user.plaiditem_set.all()
