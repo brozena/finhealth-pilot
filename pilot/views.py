@@ -1,29 +1,32 @@
 import json
+import time
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.views.decorators.csrf import csrf_exempt
+<<<<<<< HEAD
 import logging
+=======
+from asgiref.sync import sync_to_async
+>>>>>>> dev
 
-import datetime as dt
-from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.http import QueryDict
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_deny
-from asgiref.sync import iscoroutinefunction, sync_to_async 
-from django.utils.decorators import sync_and_async_middleware
 from django.conf import settings
 
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 
+import logging, ngrok
+
+from adrf.views import APIView
 from adrf.decorators import api_view
 
 
@@ -67,7 +70,7 @@ def create_user(request):
         #user.save
         # apply .filter() to avoid setting a password
         #user = User.objects.filter(username=username).get()
-        login(request, user)
+       login(request, user)
 
     return render(request, 'pilot/link.html')
 
