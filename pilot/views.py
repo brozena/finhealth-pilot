@@ -63,11 +63,10 @@ def create_user(request):
         user = User.objects.filter(username=username).get()
         login(request, user) 
     else: 
-        user = User.objects.create(username=username)
-        user.save()
-
+        user = User.objects.create_user(username=username)
+        #user.save
         # apply .filter() to avoid setting a password
-        user = User.objects.filter(username=username).get()
+        #user = User.objects.filter(username=username).get()
         login(request, user)
 
     return render(request, 'pilot/link.html')
@@ -119,16 +118,21 @@ def get_access_token(request):
 def webhook_transactions(request):
     if request.method == 'POST':
 
-        print(request.user)
-
         try:
-            data = json.loads(request.body.decode())
+
+            body = json.loads(request.body)
+            data = {}
+            data["item_id"] = body["item_id"]
+            data["webhook_type"] = body["webhook_type"]
+            data["webhook_code"] = body["webhook_code"]
+
             process_webhook.delay(data)
             
-            logger.debug(f"Webhook received: {request.body}")
+            logger.debug(f"Webhook received: {body}")
 
             return JsonResponse({'status': 'Webhook received.'}, status=200)
-        except:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.debug(str(e))
+            return JsonResponse({'error': 'Invalid JSON. Error:' + str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)

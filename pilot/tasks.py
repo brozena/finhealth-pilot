@@ -4,15 +4,23 @@ from .utils import get_transactions
 
 from celery import shared_task
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 @shared_task
 def process_webhook(data):
+
     item_id = data['item_id']
-    access_token = PlaidItem.objects.filter(item_id=item_id).values_list('access_token')[0]
+    plaid_item = PlaidItem.objects.get(item_id=item_id)
+    user = plaid_item.user
+    access_token = plaid_item.access_token
+
+    logger.debug("item_id: {0}  username: {1}".format(item_id, user))
 
     if (data['webhook_type'] == "TRANSACTIONS") and (data['webhook_code'] == "HISTORICAL_UPDATE"):
-        print(f"{data['new_transactions']} new transactions available to be retrieved.")
-        get_transactions(data, item_id, access_token)
+        get_transactions(user, data, item_id, access_token)
     else: 
-        print(f"Unhandled event type: {data['webhook_type']}, {data['webhook_code']}")
+        logger.debug(f"Unhandled event type: {data['webhook_type']}, {data['webhook_code']}")
 
     return

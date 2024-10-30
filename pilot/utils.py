@@ -2,16 +2,26 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+import plaid
+from .plaid_config import PlaidConfig
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from plaid.model.item_remove_request import ItemRemoveRequest
 
 import datetime as dt
+from dateutil.relativedelta import relativedelta
+import logging
 
-@login_required
-def get_transactions(data, item_id, access_token):
+from .models import Account, Transaction, PlaidItem
 
-    user = request.user
+logger = logging.getLogger(__name__)
+
+plaid_config = PlaidConfig(plaid.Environment.Production)
+client = plaid_config.client()
+
+def get_transactions(user, data, item_id, access_token):
+    logger.debug(f"get_transactions util: {user}")
+    user = user
 
     transactions = []
     plaid_items = user.plaiditem_set.all()
