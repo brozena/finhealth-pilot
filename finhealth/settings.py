@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'adrf',
+    'celery',
     'pilot',
 ]
 
@@ -149,4 +149,9 @@ PLAID_SECRET = os.getenv("PLAID_SECRET")
 PLAID_LINK_TOKEN = os.getenv("PLAID_LINK_TOKEN")
 
 # ngrok auth
+
 NGROK_AUTHTOKEN = os.getenv("NGROK_AUTHTOKEN")
+
+# Celery config
+
+CELERY_BROKER_URL = 'amqp://localhost'

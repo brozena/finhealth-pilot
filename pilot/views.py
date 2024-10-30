@@ -2,9 +2,13 @@ import json
 import time
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.views.decorators.csrf import csrf_exempt
+<<<<<<< HEAD
+import logging
+=======
 from asgiref.sync import sync_to_async
+>>>>>>> dev
 
 from datetime import datetime, timedelta
 
@@ -25,6 +29,7 @@ import logging, ngrok
 from adrf.views import APIView
 from adrf.decorators import api_view
 
+
 import plaid
 from plaid.exceptions import ApiException
 from plaid.api import plaid_api
@@ -39,6 +44,11 @@ from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from .plaid_config import PlaidConfig
 from .models import Account, Transaction, PlaidItem
+
+from pilot.tasks import process_webhook
+from pilot.utils import get_transactions
+
+logger = logging.getLogger(__name__)
 
 plaid_config = PlaidConfig(plaid.Environment.Production)
 client = plaid_config.client()
@@ -56,12 +66,11 @@ def create_user(request):
         user = User.objects.filter(username=username).get()
         login(request, user) 
     else: 
-        user = User.objects.create(username=username)
-        user.save()
-
+        user = User.objects.create_user(username=username)
+        #user.save
         # apply .filter() to avoid setting a password
-        user = User.objects.filter(username=username).get()
-        login(request, user)
+        #user = User.objects.filter(username=username).get()
+       login(request, user)
 
     return render(request, 'pilot/link.html')
 
@@ -108,82 +117,25 @@ def get_access_token(request):
     return JsonResponse(exchange_response.to_dict())
 
 
-@api_view(['POST'])
-async def webhook_transactions(request):
-    webhook = json.loads(request.body.decode())
-    item_id = webhook['item_id']
+@csrf_exempt
+def webhook_transactions(request):
+    if request.method == 'POST':
 
-    if (webhook['webhook_type'] == "TRANSACTIONS") & (webhook['webhook_code'] == "HISTORICAL_UPDATE"):
-        print(f"{webhook['new_transactions']} new transactions available to be retrieved.")
-        get_transactions(item_id)
-        
-        return HttpResponse(status=202)
-    else: 
-        print(f"Unhandled event type: {webhook['webhook_type']}, {webhook['webhook_code']}")
+        try:
 
-    return HttpResponse(status=200)
+            body = json.loads(request.body)
+            data = {}
+            data["item_id"] = body["item_id"]
+            data["webhook_type"] = body["webhook_type"]
+            data["webhook_code"] = body["webhook_code"]
 
-def get_transactions(request, item_id):
-    user = request.user
-    END_DATE = datetime.now().date()
-    START_DATE = (datetime.now() + timedelta(weeks=(-4*24))).date()
+            process_webhook.delay(data)
+            
+            logger.debug(f"Webhook received: {body}")
 
-    transactions = []
-    item = item_id
-    #item = user.plaiditem_set.latest('created')
+            return JsonResponse({'status': 'Webhook received.'}, status=200)
+        except Exception as e:
+            logger.debug(str(e))
+            return JsonResponse({'error': 'Invalid JSON. Error:' + str(e)}, status=400)
 
-    access_token = item.access_token
-
-    request = TransactionsGetRequest(access_token=access_token,
-                        start_date=START_DATE,
-                        end_date=END_DATE,
-                        options=TransactionsGetRequestOptions(
-                            include_original_description=True)
-                        )
-
-    response = client.transactions_get(request)
-
-    transactions = response['transactions']
-    accounts = response['accounts']
-
-    error = None
-
-    for account in accounts:
-        new_acct = Account()
-        new_acct.plaid_account_id = account['account_id']
-        new_acct.balances = account['balances']['current']
-        new_acct.mask = account['mask']
-        new_acct.name = account['name']
-        new_acct.official_name = account['official_name']
-        new_acct.subtype = account['subtype']
-        new_acct.account_type = account['type']
-        new_acct.user = user
-        new_acct.save()
-
-    for transaction in transactions:
-        new_trans = Transaction()
-        new_trans.account = user.account_set.get(plaid_account_id=transaction['account_id']) 
-        new_trans.account_owner = transaction['account_owner']
-        new_trans.amount = transaction['amount']
-        new_trans.authorized_date = transaction['authorized_date']
-        new_trans.category = transaction['category']
-        new_trans.category_id = transaction['category_id']
-        new_trans.date = datetime.strftime(transaction['date'], '%Y-%m-%d')
-        new_trans.iso_currency_code = transaction['iso_currency_code']
-        new_trans.merchant_name = transaction['merchant_name']
-        new_trans.name = transaction['name']
-        new_trans.payment_channel = transaction['payment_channel']
-        new_trans.original_description = transaction['original_description']
-        new_trans.pending = transaction['pending']
-        new_trans.pending_transaction_id = transaction['pending_transaction_id']
-        new_trans.transaction_code = transaction['transaction_code']
-        new_trans.transaction_id = transaction['transaction_id']
-        new_trans.transaction_type = transaction['transaction_type']
-        new_trans.unofficial_currency_code = transaction['unofficial_currency_code']
-        new_trans.user = user
-        new_trans.save()
-
-    request = ItemRemoveRequest(access_token=access_token)
-    response = client.item_remove(request)
-
-    return render(None, 'pilot/thanks.html')
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
