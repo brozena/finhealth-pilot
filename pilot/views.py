@@ -4,11 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.views.decorators.csrf import csrf_exempt
-<<<<<<< HEAD
 import logging
-=======
-from asgiref.sync import sync_to_async
->>>>>>> dev
 
 from datetime import datetime, timedelta
 
@@ -70,7 +66,7 @@ def create_user(request):
         #user.save
         # apply .filter() to avoid setting a password
         #user = User.objects.filter(username=username).get()
-       login(request, user)
+        login(request, user)
 
     return render(request, 'pilot/link.html')
 

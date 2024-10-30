@@ -1,9 +1,7 @@
+from django.shortcuts import render
 from .models import Account, Transaction, PlaidItem
-
 from .utils import get_transactions
-
 from celery import shared_task
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,6 +19,7 @@ def process_webhook(data):
 
     if (data['webhook_type'] == "TRANSACTIONS") and (data['webhook_code'] == "HISTORICAL_UPDATE"):
         get_transactions(user, data, item_id, access_token)
+
     else: 
         logger.debug(f"Unhandled event type: {data['webhook_type']}, {data['webhook_code']}")
 
