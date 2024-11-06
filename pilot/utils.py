@@ -27,6 +27,9 @@ def get_transactions(user, data, item_id, access_token):
 
     transactions = []
 
+    # send multiple calls to manage Plaid's transaction pagination
+    # see https://github.com/plaid/plaid-python#retrieve-transactions-older-method
+
     request = TransactionsGetRequest(access_token=access_token,
                         start_date=(dt.date.today() - relativedelta(months=24)),
                         end_date=dt.date.today(), options=TransactionsGetRequestOptions(
@@ -36,6 +39,17 @@ def get_transactions(user, data, item_id, access_token):
     response = client.transactions_get(request)
     transactions = response['transactions']
     accounts = response['accounts']
+
+    while len(transactions) < response['total_transactions']:
+        options = TransactionsGetRequestOptions()
+        options.offset = len(transactions)
+
+        request = TransactionsGetRequest(access_token=access_token,
+            start_date=(dt.date.today() - relativedelta(months=24)),
+            end_date=dt.date.today(), options=TransactionsGetRequestOptions(
+                include_original_description=True)
+        )
+        response = client.transactions_get(request)    
 
     error = None
 
