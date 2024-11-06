@@ -88,6 +88,8 @@ def get_transactions(user, data, item_id, access_token):
         new_trans.user = user
         new_trans.save()
 
+    logger.debug(f"wrote {response['total_transactions']} total transactions to db")
+
     request = ItemRemoveRequest(access_token=access_token)
     response = client.item_remove(request)
 
