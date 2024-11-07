@@ -50,6 +50,7 @@ def get_transactions(user, data, item_id, access_token):
                 include_original_description=True)
         )
         response = client.transactions_get(request)    
+        transactions.extend(response(['transactions'])
 
     error = None
 
