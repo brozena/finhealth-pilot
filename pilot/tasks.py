@@ -18,7 +18,7 @@ def process_webhook(data):
     logger.debug("item_id: {0}  username: {1}".format(item_id, user))
 
     if (data['webhook_type'] == "TRANSACTIONS") and (data['webhook_code'] == "HISTORICAL_UPDATE"):
-        get_transactions(user, data, item_id, access_token)
+        get_transactions(user, item_id, access_token)
 
     else: 
         logger.debug(f"Unhandled event type: {data['webhook_type']}, {data['webhook_code']}")

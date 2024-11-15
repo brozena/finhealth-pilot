@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 plaid_config = PlaidConfig(plaid.Environment.Production)
 client = plaid_config.client()
 
-def get_transactions(user, data, item_id, access_token):
+def get_transactions(user, item_id, access_token):
     logger.debug(f"get_transactions util: {user}")
     user = user
     item_id = item_id
@@ -50,7 +50,7 @@ def get_transactions(user, data, item_id, access_token):
                 include_original_description=True)
         )
         response = client.transactions_get(request)    
-        transactions.extend(response(['transactions']))
+        transactions.extend(response['transactions'])
 
     error = None
 
@@ -77,9 +77,7 @@ def get_transactions(user, data, item_id, access_token):
         new_trans.date = dt.datetime.strftime(transaction['date'], '%Y-%m-%d')
         new_trans.iso_currency_code = transaction['iso_currency_code']
         new_trans.merchant_name = transaction['merchant_name']
-        new_trans.name = transaction['name']
         new_trans.payment_channel = transaction['payment_channel']
-        new_trans.original_description = transaction['original_description']
         new_trans.pending = transaction['pending']
         new_trans.pending_transaction_id = transaction['pending_transaction_id']
         new_trans.transaction_code = transaction['transaction_code']
