@@ -22,10 +22,6 @@ from rest_framework.permissions import IsAuthenticated
 
 import logging, ngrok
 
-from adrf.views import APIView
-from adrf.decorators import api_view
-
-
 import plaid
 from plaid.exceptions import ApiException
 from plaid.api import plaid_api
