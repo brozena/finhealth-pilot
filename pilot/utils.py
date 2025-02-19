@@ -20,40 +20,61 @@ plaid_config = PlaidConfig(plaid.Environment.Production)
 client = plaid_config.client()
 
 def get_transactions(user, item_id, access_token):
+    """
+    Retrieve transactions from Plaid API with pagination handling.
+
+    Args:
+        user: User object
+        item_id: Plaid item ID
+        access_token: Plaid access token
+
+    Returns:
+        tuple: (transactions list, accounts list, error message)
+    """
+
     logger.debug(f"get_transactions util: {user}")
     user = user
     item_id = item_id
     access_token = access_token
 
-    transactions = []
+    try:
+        start_date = dt.date.today() - relativedelta(months=24)
+        end_date = dt.date.today()
+        transactions = []
 
-    # send multiple calls to manage Plaid's transaction pagination
-    # see https://github.com/plaid/plaid-python#retrieve-transactions-older-method
-
-    request = TransactionsGetRequest(access_token=access_token,
-                        start_date=(dt.date.today() - relativedelta(months=24)),
-                        end_date=dt.date.today(), options=TransactionsGetRequestOptions(
-                            include_original_description=True)
-                        )
-
-    response = client.transactions_get(request)
-    transactions = response['transactions']
-    accounts = response['accounts']
-
-    while len(transactions) < response['total_transactions']:
-        options = TransactionsGetRequestOptions()
-        options.offset = len(transactions)
-
-        request = TransactionsGetRequest(access_token=access_token,
-            start_date=(dt.date.today() - relativedelta(months=24)),
-            end_date=dt.date.today(), options=TransactionsGetRequestOptions(
-                include_original_description=True)
+        # Initial request
+        request = TransactionsGetRequest(
+            access_token=access_token,
+            start_date=start_date,
+            end_date=end_date,
+            options=TransactionsGetRequestOptions(
+                include_original_description=True
+            )
         )
-        response = client.transactions_get(request)    
+
+        response = client.transactions_get(request)
         transactions.extend(response['transactions'])
+        total_transactions = response['total_transactions']
+        accounts = response['accounts']
 
-    error = None
+        # Handle pagination
+        while len(transactions) < total_transactions:
+            request = TransactionsGetRequest(
+                access_token=access_token,
+                start_date=start_date,
+                end_date=end_date,
+                options=TransactionsGetRequestOptions(
+                    include_original_description=True,
+                    offset=len(transactions)
+                )
+            )
+            response = client.transactions_get(request)
+            transactions.extend(response['transactions'])
 
+    except Exception as e:
+        logger.error(f"Error retrieving transactions for user {user}: {str(e)}")
+
+    # Write to model
     for account in accounts:
         new_acct = Account()
         new_acct.plaid_account_id = account['account_id']
@@ -92,4 +113,4 @@ def get_transactions(user, item_id, access_token):
     request = ItemRemoveRequest(access_token=access_token)
     response = client.item_remove(request)
 
-    return
+    return render(None, 'pilot/thanks.html')
