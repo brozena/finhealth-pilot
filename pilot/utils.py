@@ -113,4 +113,4 @@ def get_transactions(user, item_id, access_token):
     request = ItemRemoveRequest(access_token=access_token)
     response = client.item_remove(request)
 
-    return render(None, 'pilot/thanks.html')
+    return
