@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from authentication import models
+from transaction import models
+from pilot import models

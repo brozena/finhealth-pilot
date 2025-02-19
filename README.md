@@ -4,7 +4,8 @@ This repo contains our pilot Django application intended to collect and annotate
 
 ## Local deployment
 
-First, clone our repo using `git clone https://github.com/brozena/finhealth-pilot.git`. The `sqlite` branch is configured to use Plaid's Sandbox and  sqlite3 (rather than postgresql) for easier local deployment. After cloning, navigate to the project's folder and use `git switch sqlite` before proceeding.
+
+First, clone our repo using `git clone https://github.com/brozena/finhealth-pilot.git`. The `sqlite` branch is configured to use Plaid's Sandbox and  sqlite3 (rather than postgresql) for easier local deployment. After cloning, navigate to the project's folder using `cd finhealth-pilot` and then use `git checkout -b sqlite origin/sqlite` before proceeding.
 
 We'll tend to stick to [feature branch workflows](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
 
@@ -23,7 +24,9 @@ Poetry can then be installed using `pipx install poetry`. Then run `poetry insta
 
 ### Environmental variables
 
-Environmental variables required by this project are listed in `finhealth/.env.example`. Copy that file to `finhealth/.env` and enter our Plaid API keys. These can be found in the Plaid dashboard -- get in touch with us if you need access to this. `.env` is listed in `.gitignore`; **do not** hardcode API keys or other authentication info. Note that the `sqlite` branch does not require postgres authentication details to run. 
+Environmental variables required by this project are listed in `finhealth/.env.example`. Copy that file to `finhealth/.env` and enter a Django secret of your choosing and our Plaid API keys. These can be found in the Plaid dashboard if you have access to it. 
+
+`.env` is listed in `.gitignore`; **do not** hardcode API keys or other authentication info. Note that the `sqlite` branch does not require postgres authentication details to run. 
 
 ### Starting Django locally
 

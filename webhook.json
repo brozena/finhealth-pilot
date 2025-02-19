@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "error": null,
+  "item_id": "9YrJmK3NLJH8ykw4PNMzfYKBPj6O7wfdkjEw7",
+  "new_transactions": 1911,
+  "webhook_code": "HISTORICAL_UPDATE",
+  "webhook_type": "TRANSACTIONS"
+}

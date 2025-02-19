@@ -12,13 +12,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import environ
+import os
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # reading .env file
 env = environ.Env()
 environ.Env.read_env()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -30,8 +31,9 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu']
-
+ALLOWED_HOSTS = ['localhost', 'finhealth.ist.psu.edu', 'ladybug-renewed-monthly.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://finhealth.ist.psu.edu']
+CSRF_COOKIE_SAMESITE = None
 
 # Application definition
 
@@ -42,10 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'celery',
     'pilot',
-    'authentication',
-    'balance',
-    'transaction',
+    'iowa'
 ]
 
 MIDDLEWARE = [
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'finhealth.urls'
 
@@ -85,8 +87,8 @@ WSGI_APPLICATION = 'finhealth.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env("DATABASE_NAME"),
-        'USER': env("DATABASE_USER"), 
+        'NAME': env("DATABASE_NAME"), 
+        'USER': env("DATABASE_USER"),     
         'PASSWORD': env("DATABASE_PASSWORD"),
         'HOST': env("DATABASE_HOST"),
         'PORT': env("DATABASE_PORT"),
@@ -113,6 +115,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -130,6 +134,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 # Default primary key field type
@@ -137,9 +142,17 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'auth.User'
 
 # Plaid API keys
+PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
+PLAID_SECRET = os.getenv("PLAID_SECRET")
+PLAID_LINK_TOKEN = os.getenv("PLAID_LINK_TOKEN")
 
-PLAID_CLIENT_ID = env("PLAID_CLIENT_ID")
-PLAID_SECRET = env("PLAID_SECRET")
-PLAID_LINK_TOKEN = env("PLAID_LINK_TOKEN")
+# ngrok auth
+
+NGROK_AUTHTOKEN = os.getenv("NGROK_AUTHTOKEN")
+
+# Celery config
+
+CELERY_BROKER_URL = 'amqp://localhost'
