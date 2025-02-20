@@ -42,7 +42,7 @@ from pilot.utils import get_transactions
 
 logger = logging.getLogger(__name__)
 
-plaid_config = PlaidConfig(plaid.Environment.Production)
+plaid_config = PlaidConfig(plaid.Environment.Sandbox)
 client = plaid_config.client()
 
 def index(request):
