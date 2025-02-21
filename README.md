@@ -28,7 +28,7 @@ Poetry can then be installed using `pipx install poetry`. Then run `poetry insta
 
 ### Environmental variables
 
-Environmental variables required by this project are listed in `finhealth/.env.example`. Copy that file to `finhealth/.env` and enter a Django secret of your choosing and your Plaid API keys. These can be found in the [Plaid dashboard](https://dashboard.plaid.com).
+Environmental variables required by this project are listed in `finhealth/.env.example`. Copy that file to `finhealth/.env` and enter a Django secret of your choosing and your Plaid API keys. These can be found in the [Plaid dashboard](https://dashboard.plaid.com). 
 
 `.env` is listed in `.gitignore`; **do not** hardcode API keys or other authentication info. Note that the `sqlite` branch does not require postgres authentication details to run.
 
@@ -40,17 +40,17 @@ So long as pipx/poetry are installed correctly (i.e., no issues with `pipx ensur
 ```
 poetry run python3 manage.py makemigrations
 poetry run python3 manage.py migrate
+poetry run python3 manage.py migrate --run-syncdb
 poetry run python3 manage.py runserver
 ```
 
-You may want to also run `poetry run python3 manage.py migrate --run-syncdb` before `runserver` to force the creation of all tables listed in the project's model, otherwise you'll probably run into database errors at runtime.
-
-This repo makes use of `celery` (installed via Poetry) and `rabbitmq-server` (installed manually, as a service) to handle the Plaid calls.
-
-If you want to test calls to Plaid (using either Sandbox or Production modes), you can get `rabbitmq-server` installed and then run `poetry run celery -A finhealth worker -l debug`.
-
 You'll also want to edit `finhealth/settings.py` to adjust `ALLOWED_HOSTS` to fit your needs.
 
-In our case, Apache is configured to use Poetry's venv via `mod_wsgi` using `WSGIPythonPath` and `WSGIDaemonProcess python-home` within the httpd.conf virtualhost definition.
 
-Also, we don't host this prototype on the public internet. In our case, we use an [ngrok](https://ngrok.com/) agent to establish a tunnel with a selector pointing at `/webhook_transactions`. This lets us receive Plaid's `HISTORICAL_UPDATE` webhook when transactions are ready.
+#### Handling Plaid calls
+
+This repo makes use of `celery` (installed via Poetry) and `rabbitmq-server` (installed manually, as a service) to handle the Plaid calls. If you want to test calls to Plaid (using either Sandbox or Production modes), you can get `rabbitmq-server` installed and then run `poetry run celery -A finhealth worker -l debug`.
+
+In our case, Apache is configured to use Poetry's venv through `mod_wsgi` by setting `WSGIPythonPath` and `WSGIDaemonProcess python-home` within the httpd.conf virtualhost definition. Also, since we don't host this prototype on the public internet, we use a [ngrok](https://ngrok.com/) agent to establish a tunnel with a selector pointing at `/webhook_transactions`. This lets us receive Plaid's `HISTORICAL_UPDATE` webhook when transactions are ready.
+
+Email me if you have any questions or comments!
