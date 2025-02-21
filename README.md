@@ -33,7 +33,14 @@ Environmental variables required by this project are listed in `finhealth/.env.e
 `.env` is listed in `.gitignore`; **do not** hardcode API keys or other authentication info. Note that the `sqlite` branch does not require postgres authentication details to run.
 
 
-### Starting Django locally
+### Handling Plaid calls
+
+This repo makes use of `celery` (installed via Poetry) and `rabbitmq-server` (installed manually, as a service) to handle the Plaid calls. If you want to test calls to Plaid (using either Sandbox or Production modes), you can get `rabbitmq-server` installed and then run `poetry run celery -A finhealth worker -l debug`.
+
+In our case, Apache is configured to use Poetry's venv through `mod_wsgi` by setting `WSGIPythonPath` and `WSGIDaemonProcess python-home` within the httpd.conf virtualhost definition. Also, since we don't host this prototype on the public internet, we use a [ngrok](https://ngrok.com/) agent to establish a tunnel with a selector pointing at `/webhook_transactions`. This lets us receive Plaid's `HISTORICAL_UPDATE` webhook when transactions are ready.
+
+
+### Starting Django
 
 So long as pipx/poetry are installed correctly (i.e., no issues with `pipx ensurepath` or the Poetry venv), you should be able to get a Django instance up and running in a shell using the following commands:
 
@@ -45,12 +52,5 @@ poetry run python3 manage.py runserver
 ```
 
 You'll also want to edit `finhealth/settings.py` to adjust `ALLOWED_HOSTS` to fit your needs.
-
-
-#### Handling Plaid calls
-
-This repo makes use of `celery` (installed via Poetry) and `rabbitmq-server` (installed manually, as a service) to handle the Plaid calls. If you want to test calls to Plaid (using either Sandbox or Production modes), you can get `rabbitmq-server` installed and then run `poetry run celery -A finhealth worker -l debug`.
-
-In our case, Apache is configured to use Poetry's venv through `mod_wsgi` by setting `WSGIPythonPath` and `WSGIDaemonProcess python-home` within the httpd.conf virtualhost definition. Also, since we don't host this prototype on the public internet, we use a [ngrok](https://ngrok.com/) agent to establish a tunnel with a selector pointing at `/webhook_transactions`. This lets us receive Plaid's `HISTORICAL_UPDATE` webhook when transactions are ready.
 
 Email me if you have any questions or comments!
